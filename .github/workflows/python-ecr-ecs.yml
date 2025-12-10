@@ -1,4 +1,4 @@
-name: CI/CD PIPELINE
+name: CI/CD PIPELINE FOR PYTHON APPLICATION
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
 env:
   PYTHON_VERSION: "3.11"
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.AWS_REPOSITORY }}  
+  ECR_REPOSITORY: ${{ secrets.AWS_REPOSITORY }}   # just the repo name, not the full URI
   SERVICE_NAME: "training-task-service"
   CLUSTER_NAME: "my-ecs-training"
   CONTAINER_NAME: "training-app"
@@ -59,18 +59,30 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+<<<<<<< HEAD:.github/workflows/training-ecr-ecs.yml
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v3
+=======
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} \
+                       -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest .
+>>>>>>> d6d16c57cb11fd50a2ddef913c483c39b49cf0c2:.github/workflows/python-ecr-ecs.yml
 
-      - name: Build and push image to ECR
-        id: build-and-push
-        uses: docker/build-push-action@v5
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@0.20.0
         with:
-          context: .
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+
+
+      - name: Push image to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -86,7 +98,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      
       - name: Login to Amazon ECR (for deploy)
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -100,7 +111,7 @@ jobs:
 
       - name: Debug - Check Image URI Value
         run: |
-         echo "Image URI from deploy job: ${{ steps.image-uri.outputs.uri }}"
+          echo "Image URI from deploy job: ${{ steps.image-uri.outputs.uri }}"
 
       - name: Prepare the task definition
         id: task-def
@@ -116,4 +127,5 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
+
           wait-for-service-stability: "true"
