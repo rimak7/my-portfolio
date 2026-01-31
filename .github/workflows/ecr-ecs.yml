@@ -17,7 +17,7 @@ env:
   SERVICE_NAME: "training-task-service-portfolio"
   CLUSTER_NAME: "my-portfolio"
   CONTAINER_NAME: "task-def-myportfolio "
-  ECS_TASK_DEFINITION: "task-def-portfolio"
+  ECS_TASK_DEFINITION: "task-def-portfolio.json"
 
 jobs:
   build:
