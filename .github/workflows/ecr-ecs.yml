@@ -16,8 +16,8 @@ env:
   ECR_REPOSITORY: ${{ secrets.AWS_REPOSITORY }}  
   SERVICE_NAME: "training-task-service"
   CLUSTER_NAME: "my-ecs-training"
-  CONTAINER_NAME: "training-app"
-  ECS_TASK_DEFINITION: "training-task.json"
+  CONTAINER_NAME: "task-def-myportfolio "
+  ECS_TASK_DEFINITION: "task-def-portfolio"
 
 jobs:
   build:
