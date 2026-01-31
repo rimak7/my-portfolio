@@ -69,17 +69,17 @@ jobs:
                        -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest .
 >>>>>>> d6d16c57cb11fd50a2ddef913c483c39b49cf0c2:.github/workflows/python-ecr-ecs.yml
 
-      - name: Scan Docker image with Trivy
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
+     - name: Scan Docker image with Trivy
+       uses: aquasecurity/trivy-action@0.20.0
+       with:
           image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
           format: table
           exit-code: '1'
           severity: CRITICAL,HIGH
 
 
-      - name: Push image to ECR
-        run: |
+     - name: Push image to ECR
+       run: |
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
