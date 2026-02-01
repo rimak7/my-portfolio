@@ -110,6 +110,13 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.image-uri.outputs.uri }}
 
+      - name: Debug - show container names in rendered task definition
+        run: |
+          echo "Rendered task definition file: ${{ steps.task-def.outputs.task-definition }}"
+          echo "Containers inside rendered task definition:"
+          jq -r '.containerDefinitions[].name' "${{ steps.task-def.outputs.task-definition }}" || cat "${{ steps.task-def.outputs.task-definition }}"
+
+
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
